@@ -1,0 +1,10 @@
+[gitlab-runner]
+localhost        ansible_connection=local
+
+[dev]
+localhost        ansible_connection=local
+
+[dev:vars]
+name="VMware User"
+email=developer@vmware.com
+

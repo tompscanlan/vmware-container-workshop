@@ -1,10 +1,13 @@
 default:
   cmds:
     - |
+      top=`pwd`;
       for dir in "{{.DIRS}}"; do
         cd $dir;
+        echo "running task in `pwd`";
         task;
-        cd -;
+        echo "done";
+        cd $top;
       done;
 #  sources:
 #    - **/Dockerfile

@@ -1,0 +1,5 @@
+# external_roles.yml
+
+# Role to install gitlab-runner, for running CI jobs
+- src: riemers.gitlab-runner
+

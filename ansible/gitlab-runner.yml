@@ -1,0 +1,16 @@
+---
+# file: gitlab-runner.yml - continuous integration build box
+- hosts: gitlab-runner
+  become: yes
+  tags: gitlab
+  vars:
+    gitlab_runner_docker_image: 'docker:latest'
+    gitlab_runner_tags: 
+      - "esp"
+    gitlab_runner_executor: 'docker'
+    gitlab_runner_docker_volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/cache"
+  roles:
+    - riemers.gitlab-runner
+
