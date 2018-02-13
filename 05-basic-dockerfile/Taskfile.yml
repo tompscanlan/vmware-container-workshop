@@ -1,0 +1,12 @@
+default:
+  cmds:
+    - docker build -t {{.tag}} .
+    - docker save {{.tag}} -o image.tgz
+  sources:
+    - Dockerfile
+  generates:
+    - image.tgz
+#  status:
+#    - docker images "{{.tag}}"
+  vars:
+    tag: "05-basic-dockerfile:latest"

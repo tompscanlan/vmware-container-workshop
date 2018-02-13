@@ -1,0 +1,10 @@
+default:
+  cmds:
+    - |
+      for dir in "{{.DIRS}}"; do
+        cd $dir;
+        task;
+        cd -;
+      done;
+#  sources:
+#    - **/Dockerfile
