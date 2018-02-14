@@ -6,7 +6,5 @@ default:
     - Dockerfile
   generates:
     - image.tgz
-#  status:
-#    - docker images "{{.tag}}"
   vars:
     tag: "05-basic-dockerfile:latest"
