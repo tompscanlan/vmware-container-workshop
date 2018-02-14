@@ -1,4 +1,5 @@
 default:
+  silent: true
   cmds:
     - |
       top=`pwd`;
@@ -9,5 +10,3 @@ default:
         echo "done";
         cd $top;
       done;
-#  sources:
-#    - **/Dockerfile
