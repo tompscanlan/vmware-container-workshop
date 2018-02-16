@@ -1,4 +1,5 @@
 .idea/
+.DS_Store
 image.tgz
 ansible/*.retry
 ansible/extra_vars.yml
