@@ -1,0 +1,49 @@
+default:
+  cmds:
+    - task: start
+
+build:
+  cmds:
+    - docker build -t {{.name}}:{{.tag}} .
+  sources:
+    - Dockerfile
+    - security.groovy
+    - plugins.txt
+  status:
+    - docker images | grep "^{{.name}}" | grep -q {{.tag}}
+
+start:
+  deps: [run]
+  cmds:
+    - docker start jenkins-master
+  status:
+    - docker ps -a | grep "jenkins-master" | grep -v Exited
+
+run:
+  deps: [build]
+  cmds:
+    - docker run -d --name jenkins-master --privileged
+          -p 8080:8080 -p 50000:50000
+          -v /var/run/docker.sock:/var/run/docker.sock
+          -v jenkins_home:/var/jenkins_home
+          {{.name}}:{{.tag}}
+  status:
+    - docker ps -a | grep "jenkins-master"
+
+logs:
+  cmds:
+    - docker logs jenkins-master
+  
+
+wipe:
+  cmds:
+    - docker stop jenkins-master
+    - docker rm jenkins-master
+  status:
+    - out=`docker ps -a` && echo $out | grep -qv "jenkins-master"
+
+test:
+  silent: true
+  cmds:
+    - docker images | grep "^{{.name}}" | grep -q {{.tag}}
+    - docker ps -a | grep -q "jenkins-master"

@@ -1,10 +1,16 @@
 default:
   cmds:
-    - docker build -t {{.tag}} .
-    - docker save {{.tag}} -o image.tgz
+    - task: build
+    - task: test
+build:
+  cmds:
+    - docker build -t {{.name}}:{{.tag}} .
   sources:
     - Dockerfile
-  generates:
-    - image.tgz
-  vars:
-    tag: "05-basic-dockerfile:latest"
+  status:
+    - docker images | grep "^{{.name}}" | grep -q {{.tag}}
+
+test:
+  silent: true
+  cmds:
+    - docker images | grep "^{{.name}}" | grep -q {{.tag}}
