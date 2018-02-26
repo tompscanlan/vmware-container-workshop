@@ -1,12 +1,14 @@
 default:
-  silent: true
+#  silent: true
   cmds:
     - |
       top=`pwd`;
-      for dir in "{{.DIRS}}"; do
+      for dir in * ; do
+        if [ -f "$dir/Taskfile.yml" ]; then
         cd $dir;
-        echo "running task in `pwd`";
+        echo "running task in $dir";
         task;
         echo "done";
         cd $top;
+        fi;
       done;
