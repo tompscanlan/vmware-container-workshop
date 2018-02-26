@@ -4,14 +4,24 @@ default:
     - task: build-image
     - task: test
 
-build-app:
+build-app-in-container:
   desc: Run a go build in a golang container
   cmds:
-    - docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp golang:1.8 bash -c "CGO_ENABLED=0 go build -v -ldflags '-s' -a -o app-linux-amd64"
+    - docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp golang:1.9.2 bash -c "CGO_ENABLED=0 go build -v -ldflags '-s' -a -o app-linux-amd64"
   sources:
     - ./*.go
   generates:
     - app-linux-amd64
+
+build-app:
+  desc: Run a go build assuming go is installed
+  cmds:
+    - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -ldflags '-s' -a -o app-linux-amd64
+  sources:
+    - ./*.go
+  generates:
+    - app-linux-amd64
+
 
 build-image:
   desc: Run docker build to create an image
@@ -27,13 +37,17 @@ test:
   desc: Test that the service serves
   deps: [run]
   cmds:
-    - curl localhost:{{.serviceport}}
+    - env
+    - curl {{.IP}}:{{.serviceport}}
+  vars:
+    IP:
+      sh: docker inspect {{.contianername}} | grep -i \"IPAdd | sed -e 's/[", \]//g' | cut -d ':' -f 2 | sort -u
 
 start:
   desc: Start the container if it already exists
   deps: [run]
   cmds:
-    - docker start jenkins-master
+    - docker start {{.contianername}}
   status:
     - docker ps -a | grep "{{.contianername}}" | grep -v Exited
 

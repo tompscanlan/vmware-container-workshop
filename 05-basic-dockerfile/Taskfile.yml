@@ -22,7 +22,7 @@ start:
   desc: Start the container if it already exists
   deps: [run]
   cmds:
-    - docker start jenkins-master
+    - docker start {{.contianername}}
   status:
     - docker ps -a | grep "{{.contianername}}" | grep -v Exited
 
