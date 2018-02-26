@@ -1,0 +1,4 @@
+name: "06-from-scratch-dockerfile"
+tag: "latest"
+contianername: "from-scratch-dockerfile"
+serviceport: 9081
