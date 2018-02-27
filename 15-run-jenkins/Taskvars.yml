@@ -1,2 +1,5 @@
-name: "default-project/jenkins"
+dockerhubuser: tompscanlan
+name: "15-run-jenkins"
 tag: "latest"
+contianername: "jenkins-server-local"
+serviceport: 8080

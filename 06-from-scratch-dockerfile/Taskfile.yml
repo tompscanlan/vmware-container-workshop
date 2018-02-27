@@ -1,10 +1,31 @@
 default:
   desc: Build and test that the image was built
   cmds:
-    - task: build
+    - task: build-image
     - task: test
-build:
-  desc: Run a docker build with the local Dockerfile
+
+build-app-in-container:
+  desc: Run a go build in a golang container
+  cmds:
+    - docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp golang:1.9.2 bash -c "CGO_ENABLED=0 go build -v -ldflags '-s' -a -o app-linux-amd64"
+  sources:
+    - ./*.go
+  generates:
+    - app-linux-amd64
+
+build-app:
+  desc: Run a go build assuming go is installed
+  cmds:
+    - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -ldflags '-s' -a -o app-linux-amd64
+  sources:
+    - ./*.go
+  generates:
+    - app-linux-amd64
+
+
+build-image:
+  desc: Run docker build to create an image
+  deps: [build-app]
   cmds:
     - docker build -t {{.name}}:{{.tag}} .
   sources:
@@ -13,10 +34,14 @@ build:
     - docker images | grep "^{{.name}}" | grep -q {{.tag}}
 
 test:
-  desc: Test that the image was built
-  silent: true
+  desc: Test that the service serves
+  deps: [run]
   cmds:
-    - docker images | grep "^{{.name}}" | grep -q {{.tag}}
+    - env
+    - curl {{.IP}}:{{.serviceport}}
+  vars:
+    IP:
+      sh: docker inspect {{.contianername}} | grep -i \"IPAdd | sed -e 's/[", \]//g' | cut -d ':' -f 2 | sort -u
 
 start:
   desc: Start the container if it already exists
@@ -28,11 +53,10 @@ start:
 
 run:
   desc: Run the container with the local directiro bind mounted
-  deps: [build]
+  deps: [build-image]
   cmds:
     - docker run -d --name {{.contianername}}
-          -p 9080:80
-          -v $PWD:/var/www
+          -p 9081:8080
           {{.name}}:{{.tag}}
   status:
     - docker ps -a | grep "{{.contianername}}"

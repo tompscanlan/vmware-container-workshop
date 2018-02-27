@@ -1,0 +1,64 @@
+#!groovy​
+
+pipeline {
+    agent any
+    stages {
+
+        stage('get task binary') {
+            agent { docker 'golang:1.10.0-alpine3.7' }
+
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+
+                    sh '''
+                      apk update
+                      apk add git
+                      go get -u -v github.com/go-task/task/cmd/task
+                      cp /go/bin/task task
+                   '''
+
+                   stash includes: 'task', name: 'task'
+                }
+            }
+        }
+
+       stage('build-app') {
+           agent { docker 'golang:1.10.0-alpine3.7' }
+           steps {
+               timeout(time: 5, unit: 'MINUTES') {
+                   unstash 'task'
+                   sh '''
+                     apk update
+                     apk add curl
+
+                     cp task /bin/
+                     pwd
+                     ls -alrt
+                     cd 06-from-scratch-dockerfile
+                     task build-app
+                     ./app-linux-amd64 &
+                   '''
+
+                  sh '''
+                     netstat -anp
+                     curl localhost:8080
+                  '''
+
+                }
+            }
+       }
+       stage('build-image') {
+           agent { docker 'docker:dind' }
+           steps {
+               timeout(time: 5, unit: 'MINUTES') {
+                   unstash 'task'
+                   sh '''
+                     cp task /bin/
+                     cd 06-from-scratch-dockerfile
+                     task build-image
+                   '''
+               }
+           }
+       }
+    }
+}
