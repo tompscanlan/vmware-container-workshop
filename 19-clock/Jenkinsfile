@@ -18,7 +18,10 @@ node {
 
     stage('Test Inside A Container') {
         testImage.inside {
-            sh 'date; false;'
+            sh 'date'
+
+            // uncomment this to simulate failing tests
+            //sh 'false'
 
         }
     }
