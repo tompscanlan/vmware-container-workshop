@@ -18,7 +18,8 @@ node {
 
     stage('Test Inside A Container') {
         testImage.inside {
-            sh 'date'
+            sh 'date; false;'
+
         }
     }
 
