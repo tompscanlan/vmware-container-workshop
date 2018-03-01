@@ -1,0 +1,50 @@
+#!groovy​
+
+node {
+    def imagename = "clock"
+    def testImage
+
+    stage('Example') {
+        if (env.BRANCH_NAME == 'master') {
+            echo 'I only execute on the master branch'
+        } else {
+            echo 'I execute elsewhere'
+        }
+    }
+
+    stage('Build Image') {
+        testImage = docker.build("default-project/${imagename}:${env.BUILD_ID}", "./19-clock")
+    }
+
+    stage('Test Inside A Container') {
+        testImage.inside {
+            sh 'date'
+        }
+    }
+
+    stage('Push to Secure Registry') {
+        docker.withRegistry('https://vic.home.local', 'harbor-cred') {
+            testImage.push("${env.BUILD_ID}")
+            testImage.push('latest')
+        }
+
+    }
+    stage('Deploy to Prod') {
+        sh """
+        pwd
+        ls -al
+        export DOCKER_HOST=192.168.1.202:2376
+        export DOCKER_TLS_VERIFY=1
+        export DOCKER_CERT_PATH=/var/vch-testing
+        export COMPOSE_TLS_VERSION=TLSv1_2
+
+        # pull the image from the secured registry to the VCH
+        docker pull vic.home.local/default-project/${imagename}:${env.BUILD_ID}
+
+        curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` -o docker-compose
+        chmod 755 docker-compose
+        # raise the service
+        ./docker-compose -f 19-clock/docker-compose.yml up -d
+        """
+    }
+}

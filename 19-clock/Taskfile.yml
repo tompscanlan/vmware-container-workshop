@@ -1,0 +1,50 @@
+default:
+  desc: Build and test that the image was built
+  cmds:
+    - task: build-image
+    - task: test
+
+build-image:
+  desc: Run docker build to create an image
+  cmds:
+    - docker build -t {{.name}}:{{.tag}} .
+  sources:
+    - Dockerfile
+  status:
+    - docker images | grep "^{{.name}}" | grep -q {{.tag}}
+
+test:
+  desc: Test that the service serves
+  deps: [run]
+  cmds:
+    - docker logs {{.contianername}}
+
+start:
+  desc: Start the container if it already exists
+  deps: [run]
+  cmds:
+    - docker start {{.contianername}}
+  status:
+    - docker ps -a | grep "{{.contianername}}" | grep -v Exited
+
+run:
+  desc: Run the container with the local directiro bind mounted
+  deps: [build-image]
+  cmds:
+    - docker run -d --name {{.contianername}}
+          {{.name}}:{{.tag}}
+  status:
+    - docker ps -a -f "name={{.contianername}}" | grep {{.contianername}}
+
+logs:
+  desc: View the logs from the container
+  cmds:
+    - docker logs "{{.contianername}}"
+
+wipe:
+  desc: Stop and remove the container
+  cmds:
+    - docker stop {{.contianername}}
+    - docker rm {{.contianername}}
+  status:
+    - out=`docker ps -a` && echo $out | grep -qv "{{.contianername}}"
