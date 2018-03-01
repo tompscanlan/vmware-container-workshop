@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+
+  clock:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vic.home.local/default-project/clock
