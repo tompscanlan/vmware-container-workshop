@@ -13,6 +13,8 @@ node {
     }
 
     stage('Build Image') {
+        sh 'ls -al'
+        sh 'pwd'
         testImage = docker.build("default-project/${imagename}:${env.BUILD_ID}", "./19-clock")
     }
 
