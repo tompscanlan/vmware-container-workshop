@@ -22,7 +22,6 @@ node {
 
             // uncomment this to simulate failing tests
             //sh 'false'
-
         }
     }
 
@@ -34,6 +33,8 @@ node {
 
     }
     stage('Deploy to Prod') {
+        input message: "Release this to production?"
+
         sh """
         pwd
         ls -al
