@@ -1,0 +1,5 @@
+# A basic apache server.
+# To use, either add or bind mount content under /var/www
+FROM test:latest
+
+RUN echo  "asdasdasd" > tomwashere

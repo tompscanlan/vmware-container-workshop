@@ -2,7 +2,9 @@ default:
   desc: Build and test that the image was built
   cmds:
     - task: build
+    - task: build-second-layer
     - task: test
+
 build:
   desc: Run a docker build with the local Dockerfile
   cmds:
@@ -11,6 +13,16 @@ build:
     - Dockerfile
   status:
     - docker images | grep "^{{.name}}" | grep -q {{.tag}}
+
+build-second-layer:
+  desc: Run a docker build based on the first image
+  deps: [build]
+  cmds:
+    - docker build -t {{.nametop}}:{{.tagtop}} -f Dockerfile.layer2 .
+  sources:
+    - Dockerfile
+  status:
+    - docker images | grep "^{{.nametop}}" | grep -q {{.tagtop}}
 
 test:
   desc: Test that the image was built
@@ -42,6 +54,11 @@ logs:
   cmds:
     - docker logs "{{.contianername}}"
 
+wipeall:
+  cmds:
+    - task: wipe
+    - task: wipe-second-layer
+
 wipe:
   desc: Stop and remove the container
   cmds:
@@ -49,3 +66,11 @@ wipe:
     - docker rm {{.contianername}}
   status:
     - out=`docker ps -a` && echo $out | grep -qv "{{.contianername}}"
+
+wipe-second-layer:
+  desc: Stop and remove the second layer container
+  cmds:
+    - docker stop {{.contianernametop}}
+    - docker rm {{.contianernametop}}
+  status:
+    - out=`docker ps -a` && echo $out | grep -qv "{{.contianernametop}}"
