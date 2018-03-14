@@ -47,4 +47,4 @@ wipe:
     - docker stop {{.contianername}}
     - docker rm {{.contianername}}
   status:
-    - out=`docker ps -a` && echo $out | grep -qv "{{.contianername}}"
+    - out=`docker ps -a` && echo $out | grep -qw "{{.contianername}}"

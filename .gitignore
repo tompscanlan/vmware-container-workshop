@@ -5,3 +5,4 @@ ansible/*.retry
 ansible/extra_vars.yml
 ansible/inventory
 app-linux-amd64
+clock.data
